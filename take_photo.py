@@ -19,16 +19,12 @@
 # Options:
 # Currently none - could add resolution, burst, naming, root directory, etc.
 
-# TODO: Re-think the class definition - defining file names and directories
-# should be seprate from photo, but the raspistill command writes the file
-# - maybe pass in the directory and file name.  Does the Photo class need
-#   the daytime?
+import os
 import datetime
 
 def take_photo():
     ROOT_DIR = "/synology211j/Share/raspberry-pi/timelapse/"
     file_mgr = FileManager(ROOT_DIR)
-    file_mgr.get_datetime()
     file_mgr.get_file_path()
     # photo = Photo()
     # photo.get_datetime()
@@ -43,21 +39,28 @@ class FileManager:
     def __init__(self, root_dir="."):
         self.root_dir = root_dir
 
-    def get_datetime(self):
+    def _get_datetime(self):
         # Get the current year, month, day, hour, minute, second
         now = datetime.datetime.now()
-        self.year, self.month, self.day, self.hour, self.minute, self.second = \
-            now.year, now.month, now.day, now.hour, now.minute, now.second
+        return (now.year, now.month, now.day, now.hour, now.minute, now.second)
+
+    def _create_directories(self, year, month, day):
+        # Create year/month/day directories (if needed)
+        # TODO Handle errors
+        os.makedirs(os.path.join(self.root_dir, year, month, day))
+        return
 
     def get_file_path(self):
-        self.get_datetime
         # Use a filename of year-month-day_hour-min-sec
         # Assume two photos will not be taken in the same second
-        # TODO Decide what to do if a file with the target name exists.
+        year, month, day, hour, minute, second = self._get_datetime()
+        # NEXT Should we have a separate path and file name?
         self.file_name = "{:04d}-{:02d}-{:02d}_{:02d}-{:02d}-{:02d}".format(
-            self.year, self.month, self.day, self.hour, self.minute, self.second)
+            year, month, day, hour, minute, second)
         sub_dir = "{:04d}/{:02d}/{:02d}/".format(self.year, self.month, self.day)
-        self.file_path = self.root_dir + sub_dir + self.file_name + ".jpg"
+        self.file_path = self.root_dir + "/" + sub_dir + self.file_name + ".jpg"
+        # TODO What function should create the directories?
+        # TODO Decide what to do if a file with the target name exists.
         print self.file_path
         return self.file_path
 

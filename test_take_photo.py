@@ -51,17 +51,27 @@ class TestFileManager(unittest.TestCase):
             "Verify directories created successfully")
 
         # Clean up - remove directories created just for this test
+        # TODO Is there a better way?  os.removedirs works, but it would
+        #      remove root_dir, which we don't want.
         os.rmdir(os.path.join(root_dir, year, month, day))
         os.rmdir(os.path.join(root_dir, year, month))
         os.rmdir(os.path.join(root_dir, year))
         self.assertFalse(os.path.isdir(os.path.join(root_dir, year)),
             "Verify year directory does not exist after clean up")
 
-        # TODO Verify the directories all exist, check permissions?
+        # TODO Check permissions?
         # TODO Verify exceptions when directories can't be created
         # - Bogus root directory?
         # - Insufficient permissions?
 
+    def test_get_file_path(self):
+        root_dir = "./test/temp"
+        f = take_photo.FileManager(root_dir)
+        file_path = f.get_file_path()
+        # NEXT Test the returned file path and file name
+        print file_path
+        # NEXT clean up - temove test dirs.  Avoid DRY issues
+        
 suite = unittest.TestLoader().loadTestsFromTestCase(TestFileManager)
 unittest.TextTestRunner(verbosity=2).run(suite)
 

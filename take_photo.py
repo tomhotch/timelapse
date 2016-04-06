@@ -51,18 +51,22 @@ class FileManager:
         return
 
     def get_file_path(self):
+        # Create year/month/day sub-directories, as needed.
+        # Return the path + the file name to create
         # Use a filename of year-month-day_hour-min-sec
         # Assume two photos will not be taken in the same second
+
         year, month, day, hour, minute, second = self._get_datetime()
-        # NEXT Should we have a separate path and file name?
+        year_str = "{:04d}".format(year)
+        month_str = "{:02d}".format(month)
+        day_str = "{:02d}".format(day)
+        self._create_directories(year_str, month_str, day_str)
         self.file_name = "{:04d}-{:02d}-{:02d}_{:02d}-{:02d}-{:02d}".format(
             year, month, day, hour, minute, second)
-        sub_dir = "{:04d}/{:02d}/{:02d}/".format(self.year, self.month, self.day)
-        self.file_path = self.root_dir + "/" + sub_dir + self.file_name + ".jpg"
-        # TODO What function should create the directories?
+        
         # TODO Decide what to do if a file with the target name exists.
-        print self.file_path
-        return self.file_path
+        #return os.path.join('bogus')
+        return os.path.join(self.root_dir, year_str, day_str, month_str, self.file_name)
 
 
 class Photo:

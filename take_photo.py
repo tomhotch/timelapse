@@ -65,8 +65,8 @@ class FileManager:
             year, month, day, hour, minute, second)
         
         # TODO Decide what to do if a file with the target name exists.
-        #return os.path.join('bogus')
-        return os.path.join(self.root_dir, year_str, day_str, month_str, self.file_name)
+        return os.path.join(self.root_dir, year_str, month_str, day_str,
+            self.file_name)
 
 
 class Photo:

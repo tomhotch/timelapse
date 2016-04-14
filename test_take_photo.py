@@ -63,26 +63,60 @@ class TestFileManager(unittest.TestCase):
         # - Insufficient permissions?
 
     def test_get_file_path(self):
-        root_dir = os.path.join(".", "test", "temp")
-        os.makedirs(root_dir)
+        try:
+            root_dir = os.path.join(".", "test", "temp")
+            os.makedirs(root_dir)
 
-        f = take_photo.FileManager(root_dir)
-        file_path = f.get_file_path()
+            f = take_photo.FileManager(root_dir)
+            file_path = f.get_file_path()
 
-        # TODO: The regex path check is unix specific.  Is there
-        # a way to have a regexp check for os path separator?
-        path, basename = os.path.split(file_path)
-        self.assertRegexpMatches(path, "\d\d\d\d/\d\d/\d\d",
-            "Verify path format is yyyy/mm/dd")
+            # TODO: The regex path check is unix specific.  Is there
+            # a way to have a regexp check for os path separator?
+            path, basename = os.path.split(file_path)
+            self.assertRegexpMatches(path, "\d\d\d\d/\d\d/\d\d",
+                "Verify path format is yyyy/mm/dd")
 
-        self.assertRegexpMatches(basename, "\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d",
-            "Verify file name format is year-month-day_hour-minute-second")
+            self.assertRegexpMatches(basename, "\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d",
+                "Verify file name format is year-month-day_hour-minute-second")
 
-        # Clean up - remove directories created just for this test
-        os.removedirs(os.path.dirname(file_path))
-        self.assertFalse(os.path.isdir(root_dir),
-            "Verify test directory does not exist after clean up")
+        finally:
+            # Clean up - remove directories created just for this test
+            os.removedirs(os.path.dirname(file_path))
+            self.assertFalse(os.path.isdir(root_dir),
+                "Verify test directory does not exist after clean up")
+
+class TestPhoto(unittest.TestCase):
+    def test_take_and_save_photo(self):
+        try:
+            test_dir = "test"
+            os.makedirs(test_dir)
+            test_file = "test.jpg"
+            test_file_path = os.path.join(test_dir, test_file)
+
+            self.assertFalse(os.path.isfile(test_file_path),
+                "Verify test file does not exist before taking photo")
+
+            p = take_photo.Photo()
+            p.take_and_save_photo(test_file_path)
+            self.assertTrue(os.path.isfile(test_file_path),
+                "Verify test file exists after taking photo")
+
+            # Expected size of .jpg with 1920 x 1080 resolution
+            MIN_FILE_SIZE = 1000000
+            MAX_FILE_SIZE = 1500000
+            size = os.path.getsize(test_file_path)
+            self.assertIn(size, range(MIN_FILE_SIZE, MAX_FILE_SIZE),
+                "Verify test file size is within an expected range")
+
+            # NEXT Should we check exif properties, maybe resolution?
+
+        finally:
+            # Clean up test directories and files
+            os.remove(test_file_path)
+            os.removedirs(test_dir)
+        return
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestFileManager)
+suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhoto))
 unittest.TextTestRunner(verbosity=2).run(suite)
 

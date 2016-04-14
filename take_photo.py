@@ -20,15 +20,16 @@
 # Currently none - could add resolution, burst, naming, root directory, etc.
 
 import os
+import time
 import datetime
+
+import picamera
 
 def take_photo():
     ROOT_DIR = "/synology211j/Share/raspberry-pi/timelapse/"
     file_mgr = FileManager(ROOT_DIR)
-    file_mgr.get_file_path()
-    # photo = Photo()
-    # photo.get_datetime()
-    # photo.take_and_save_photo()
+    file_name_path = file_mgr.get_file_path()
+    photo.take_and_save_photo(file_name_path)
     # Log a message
 
 class FileManager:
@@ -72,12 +73,24 @@ class FileManager:
 class Photo:
     """Actions and meta data for a photo"""
 
-    def take_and_save_photo(self, file_name):
-        # Take photo
-        # Use PiCamera python module
-        # Use raspistill -n (--nopreview)
-        # raspistill --mode 1 is for 1920x1080, what's partial FOV?
-        # Is date time and other info saved in the exif data by default?
+    def take_and_save_photo(self, file_path_name):
+        # Take a photo and save it in the given file path name
+        # file_path_name includes a relative or absolute path to the file
+
+        with picamera.PiCamera() as camera:
+            # Let camera start up and stabilize
+            # A quick internet suggests at least 1 sec, so 2 is safe
+            CAMERA_START_UP_TIME = 2
+
+            # 1920x108o is HD video at about 1.2MB per jpg file
+            HORIZONTAL_RESOLUTION = 1920
+            VERTICAL_RESOLUTION = 1080
+            camera.resolution = (HORIZONTAL_RESOLUTION, VERTICAL_RESOLUTION)
+            # TODO Do we want to add anything to exif data?
+
+            time.sleep(CAMERA_START_UP_TIME)
+            camera.capture(file_path_name)
+
         return
 
 

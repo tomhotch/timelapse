@@ -39,23 +39,26 @@ class TestFileManager(unittest.TestCase):
 
     def test_create_direcotry(self):
         root_dir = os.path.join(".", "test", "temp")
-        f = take_photo.FileManager(root_dir)
-        os.makedirs(root_dir)
 
-        # Pick some specific values to verify the right directories get created
-        year, month, day = '2001', '09', '11'
+        try:
+            f = take_photo.FileManager(root_dir)
+            os.makedirs(root_dir)
 
-        self.assertFalse(os.path.isdir(os.path.join(root_dir, year)),
-            "Verify year directory does not exist before creating it")
+            # Pick some specific values to verify the right directories get created
+            year, month, day = '2001', '09', '11'
 
-        f._create_directories(year, month, day)
-        self.assertTrue(os.path.isdir(os.path.join(root_dir, year, month, day)),
-            "Verify directories created successfully")
+            self.assertFalse(os.path.isdir(os.path.join(root_dir, year)),
+                "Verify year directory does not exist before creating it")
 
-        # Clean up - remove directories created just for this test
-        os.removedirs(os.path.join(root_dir, year, month, day))
-        self.assertFalse(os.path.isdir(root_dir),
-            "Verify test directory does not exist after clean up")
+            f._create_directories(year, month, day)
+            self.assertTrue(os.path.isdir(os.path.join(root_dir, year, month, day)),
+                "Verify directories created successfully")
+
+        finally:
+            # Clean up - remove directories created just for this test
+            os.removedirs(os.path.join(root_dir, year, month, day))
+            self.assertFalse(os.path.isdir(root_dir),
+                "Verify test directory does not exist after clean up")
 
         # TODO Check permissions?
         # TODO Verify exceptions when directories can't be created
@@ -63,10 +66,10 @@ class TestFileManager(unittest.TestCase):
         # - Insufficient permissions?
 
     def test_get_file_path(self):
-        try:
-            root_dir = os.path.join(".", "test", "temp")
-            os.makedirs(root_dir)
+        root_dir = os.path.join(".", "test", "temp")
+        os.makedirs(root_dir)
 
+        try:
             f = take_photo.FileManager(root_dir)
             file_path = f.get_file_path()
 
@@ -87,12 +90,12 @@ class TestFileManager(unittest.TestCase):
 
 class TestPhoto(unittest.TestCase):
     def test_take_and_save_photo(self):
-        try:
-            test_dir = "test"
-            os.makedirs(test_dir)
-            test_file = "test.jpg"
-            test_file_path = os.path.join(test_dir, test_file)
+        test_dir = "test"
+        os.makedirs(test_dir)
+        test_file = "test.jpg"
+        test_file_path = os.path.join(test_dir, test_file)
 
+        try:
             self.assertFalse(os.path.isfile(test_file_path),
                 "Verify test file does not exist before taking photo")
 
@@ -102,11 +105,13 @@ class TestPhoto(unittest.TestCase):
                 "Verify test file exists after taking photo")
 
             # Expected size of .jpg with 1920 x 1080 resolution
-            MIN_FILE_SIZE = 1000000
+            MIN_FILE_SIZE =  600000
             MAX_FILE_SIZE = 1500000
             size = os.path.getsize(test_file_path)
-            self.assertIn(size, range(MIN_FILE_SIZE, MAX_FILE_SIZE),
-                "Verify test file size is within an expected range")
+            msg = "File size is: {:d}. ".format(size)
+            msg = msg + "Should be between {:d} and {:d}".format(
+                MIN_FILE_SIZE, MAX_FILE_SIZE)
+            self.assertIn(size, range(MIN_FILE_SIZE, MAX_FILE_SIZE), msg)
 
             # NEXT Should we check exif properties, maybe resolution?
 
@@ -114,6 +119,8 @@ class TestPhoto(unittest.TestCase):
             # Clean up test directories and files
             os.remove(test_file_path)
             os.removedirs(test_dir)
+            self.assertFalse(os.path.isfile(test_dir),
+                "Verify test directory does not exist after clean-up")
         return
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestFileManager)

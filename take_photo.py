@@ -25,13 +25,6 @@ import datetime
 
 import picamera
 
-def take_photo():
-    ROOT_DIR = "/synology211j/Share/raspberry-pi/timelapse/"
-    file_mgr = FileManager(ROOT_DIR)
-    file_name_path = file_mgr.get_file_path()
-    photo.take_and_save_photo(file_name_path)
-    # Log a message
-
 class FileManager:
     """Create directories and file names for storing photos"""
     # One photo per minute is 1,440 photos per day, so use one dir per day:
@@ -93,6 +86,14 @@ class Photo:
 
         return
 
+def take_photo():
+    ROOT_DIR = "/synology211j/Share/raspberry-pi/timelapse/"
+    file_mgr = FileManager(ROOT_DIR)
+    file_name_path = file_mgr.get_file_path()
+
+    photo = Photo()
+    photo.take_and_save_photo(file_name_path)
+    # Log a message
 
 # Enable running the module as a script
 if __name__ == "__main__":

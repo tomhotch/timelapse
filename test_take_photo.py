@@ -38,35 +38,70 @@ class TestFileManager(unittest.TestCase):
             "FileManger get_datetime returns a valid second")
 
     def test_create_direcotry(self):
-        root_dir = os.path.join(".", "test", "temp")
+
+        # Successful cases
+        root_dir = os.path.join("test")
+        os.makedirs(root_dir)
+        test_dirs = []
 
         try:
-            f = take_photo.FileManager(root_dir)
-            os.makedirs(root_dir)
-
             # Pick some specific values to verify the right directories get created
             year, month, day = '2001', '09', '11'
+            year_dir = os.path.join(root_dir, year)
+            expected_dir = os.path.join(root_dir, year, month, day)
+            test_dirs.append(expected_dir)
 
-            self.assertFalse(os.path.isdir(os.path.join(root_dir, year)),
+            self.assertFalse(os.path.isdir(year_dir),
                 "Verify year directory does not exist before creating it")
 
-            f._create_directories(year, month, day)
-            self.assertTrue(os.path.isdir(os.path.join(root_dir, year, month, day)),
+            f = take_photo.FileManager(root_dir)
+            f._create_directories(root_dir, year, month, day)
+            self.assertTrue(os.path.isdir(expected_dir),
                 "Verify directories created successfully")
+
+            # Make sure the top level directory created has owner, group,
+            # and world read/write/execute permission.  I didn't set up
+            # proper usernames on different systems, so I want to be able
+            # to read, write and delete files from different computers
+            # (including from Windows) as different users.
+            #
+            # Assume Linux since the script is designed to run on
+            # Raspberry Pi
+
+            mode = os.stat(year_dir).st_mode & 0777
+            self.assertEqual(mode, 0777,
+                "Verity year directory is user, group, world read/write/execute")
+
+            f._create_directories(root_dir, year, month, day)
+            self.assertTrue(os.path.isdir(expected_dir),
+                "Verify create_directories works if the directory already exists")
+
+            # Try making just a day directory (year and month exist)
+            day = '12'
+            expected_dir = os.path.join(root_dir, year, month, day)
+            test_dirs.append(expected_dir)
+            self.assertFalse(os.path.isdir(expected_dir),
+                "Verify day directory does not exist before creating it")
+
+            f._create_directories(root_dir, year, month, day)
+            self.assertTrue(os.path.isdir(expected_dir),
+                "Verify a new day directory was created successfully")
+
 
         finally:
             # Clean up - remove directories created just for this test
-            os.removedirs(os.path.join(root_dir, year, month, day))
-            self.assertFalse(os.path.isdir(root_dir),
-                "Verify test directory does not exist after clean up")
+            for dir in test_dirs:
+                os.removedirs(dir)
+                self.assertFalse(os.path.isdir(dir),
+                    "Verify test directory does not exist after clean up")
 
-        # TODO Check permissions?
-        # TODO Verify exceptions when directories can't be created
-        # - Bogus root directory?
-        # - Insufficient permissions?
+            self.assertFalse(os.path.isdir(root_dir),
+                "Verify root test directory does not exist after clean up")
 
     def test_get_file_path(self):
-        root_dir = os.path.join(".", "test", "temp")
+
+        # Successful cases
+        root_dir = os.path.join("temp")
         os.makedirs(root_dir)
 
         try:
@@ -79,14 +114,36 @@ class TestFileManager(unittest.TestCase):
             self.assertRegexpMatches(path, "\d\d\d\d/\d\d/\d\d",
                 "Verify path format is yyyy/mm/dd")
 
-            self.assertRegexpMatches(basename, "\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d",
-                "Verify file name format is year-month-day_hour-minute-second")
+            self.assertRegexpMatches(basename,
+                "\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d.jpg",
+                "Verify file name format is year-month-day_hour-minute-second.jpg")
 
         finally:
             # Clean up - remove directories created just for this test
             os.removedirs(os.path.dirname(file_path))
             self.assertFalse(os.path.isdir(root_dir),
                 "Verify test directory does not exist after clean up")
+
+        # Error Cases
+        # Create a directory that can't be written to
+        unwritable_dir = "unwritable"
+        TEST_UMASK = 0222
+        orig_umask = os.umask(TEST_UMASK)
+        os.makedirs(unwritable_dir)
+
+        try:
+            # Make sure we get an exception if creating the directory fails
+            f = take_photo.FileManager(unwritable_dir)
+            self.assertRaises(OSError, f.get_file_path )
+
+            # NEXT Update tests & comments - a non-existent root_dir
+            # gets created
+            
+            # TODO What about passing an incorrect type?
+        finally:
+            os.umask(orig_umask)
+            os.removedirs(unwritable_dir)
+
 
 class TestPhoto(unittest.TestCase):
     def test_take_and_save_photo(self):

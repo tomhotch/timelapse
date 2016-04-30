@@ -7,6 +7,8 @@
 # Pre-conditions:
 # - Called as a scheduled cron task
 # - Access to an NFS drive for saving photos
+# - Runs on Raspberry Pi linux. Depends on the Pi camera and some code is
+#   linux specific.
 #
 # Post-conditions:
 # - Create a new directory if necessary
@@ -38,10 +40,25 @@ class FileManager:
         now = datetime.datetime.now()
         return (now.year, now.month, now.day, now.hour, now.minute, now.second)
 
-    def _create_directories(self, year, month, day):
-        # Create year/month/day directories (if needed)
+    def _create_directories(self, root, year, month, day):
+        # Create root/year/month/day directories (if needed)
+
+        # On Raspberry Pi, it seems os.makedirs ignores the mode parameter,
+        # so the umask has to be changed to control permissions.  I want
+        # world rwx access to allow different users from different hosts
+        # to read/edit/delete files and directories (I don't have things
+        # set up to access the NFS server as a specific user).  Set the
+        # umask to 0 to make the directories world rwx.
+        # TODO: Make umask a parameter or class attribute.
+        UMASK = 0
+        os.umask(UMASK)
+
+        # TODO Could be a generic routine that joins an arbitrary
+        # number of args to create a directory.
         # TODO Handle errors
-        os.makedirs(os.path.join(self.root_dir, year, month, day))
+        dir = os.path.join(root, year, month, day)
+        if not os.path.isdir(dir):
+            os.makedirs(dir)
         return
 
     def get_file_path(self):
@@ -54,11 +71,12 @@ class FileManager:
         year_str = "{:04d}".format(year)
         month_str = "{:02d}".format(month)
         day_str = "{:02d}".format(day)
-        self._create_directories(year_str, month_str, day_str)
-        self.file_name = "{:04d}-{:02d}-{:02d}_{:02d}-{:02d}-{:02d}".format(
-            year, month, day, hour, minute, second)
+
+        self._create_directories(self.root_dir, year_str, month_str, day_str)
+
+        self.file_name = year_str + "-" + month_str + "-" + day_str + "_" \
+            + "{:02d}-{:02d}-{:02d}.jpg".format(hour, minute, second)
         
-        # TODO Decide what to do if a file with the target name exists.
         return os.path.join(self.root_dir, year_str, month_str, day_str,
             self.file_name)
 

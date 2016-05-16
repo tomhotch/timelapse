@@ -41,7 +41,6 @@ class TestFileManager(unittest.TestCase):
 
         # Successful cases
         root_dir = os.path.join("test")
-        os.makedirs(root_dir)
         test_dirs = []
 
         try:
@@ -51,7 +50,7 @@ class TestFileManager(unittest.TestCase):
             expected_dir = os.path.join(root_dir, year, month, day)
             test_dirs.append(expected_dir)
 
-            self.assertFalse(os.path.isdir(year_dir),
+            self.assertFalse(os.path.isdir(root_dir),
                 "Verify year directory does not exist before creating it")
 
             f = take_photo.FileManager(root_dir)
@@ -102,8 +101,6 @@ class TestFileManager(unittest.TestCase):
 
         # Successful cases
         root_dir = os.path.join("temp")
-        os.makedirs(root_dir)
-
         try:
             f = take_photo.FileManager(root_dir)
             file_path = f.get_file_path()
@@ -136,10 +133,6 @@ class TestFileManager(unittest.TestCase):
             f = take_photo.FileManager(unwritable_dir)
             self.assertRaises(OSError, f.get_file_path )
 
-            # NEXT Update tests & comments - a non-existent root_dir
-            # gets created
-            
-            # TODO What about passing an incorrect type?
         finally:
             os.umask(orig_umask)
             os.removedirs(unwritable_dir)

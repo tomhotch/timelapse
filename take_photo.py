@@ -24,6 +24,7 @@
 import os
 import time
 import datetime
+import logging
 
 import picamera
 
@@ -62,7 +63,7 @@ class FileManager:
         return
 
     def get_file_path(self):
-        # Create year/month/day sub-directories, as needed.
+        # Create root/year/month/day sub-directories, as needed.
         # Return the path + the file name to create
         # Use a filename of year-month-day_hour-min-sec
         # Assume two photos will not be taken in the same second
@@ -105,13 +106,38 @@ class Photo:
         return
 
 def take_photo():
-    ROOT_DIR = "/synology211j/Share/raspberry-pi/timelapse/"
-    file_mgr = FileManager(ROOT_DIR)
-    file_name_path = file_mgr.get_file_path()
+    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
+        level=logging.INFO)
+    # ROOT_DIR = "/synology211j/Share/raspberry-pi/timelapse/"
+    ROOT_DIR = "/media/usb1/projects/timelapse"
+    # ROOT_DIR = "/home/pi/projects/timelapse/photos"
+    # ROOT_DIR = '/bogus'
+    logging.debug('Starting take_photo')
+    try:
+        logging.debug('Creating FileManager')
+        file_mgr = FileManager(ROOT_DIR)
+        logging.debug('Getting file path')
+        file_name_path = file_mgr.get_file_path()
+        logging.debug('Photo file path name: %s', file_name_path)
+    except:
+        # Got an error trying to create the directory.
+        # NEXT file_name_path isn't set on an exception.  What exception message
+        #      is raised?  Print that?  Yes, need to debug the error.
+        # NEXT Create a unit (or behavioral test) to check this logic - does
+        #      it need to be put into a separate module?
+        logging.error('Failed to create: %s', os.path.dirname(file_name_path))
+        return
 
     photo = Photo()
     photo.take_and_save_photo(file_name_path)
-    # Log a message
+    # NEXT Add message logging
+    # NEXT Add tests for logging and top level take_photo
+    # NEXT Add check as to whether or not to take a photo - provide a way
+    #      to turn off/on capture without editing cron tab.  Log a message
+    #      if disabled
+    # LATER Add a separate monitoring routine to send email if photos
+    #       aren't being added to the NFS share (maye run on a different
+    #       computer in case the Pi dies?
 
 # Enable running the module as a script
 if __name__ == "__main__":

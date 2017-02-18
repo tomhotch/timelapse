@@ -6,7 +6,8 @@
 #
 # Pre-conditions:
 # - Called as a scheduled cron task
-# - Access to an NFS drive for saving photos
+# - Access to storage for saving the photo
+#   Storage could be local, an external USB drive, or NFS
 # - Runs on Raspberry Pi linux. Depends on the Pi camera and some code is
 #   linux specific.
 #
@@ -85,37 +86,46 @@ class FileManager:
 class Photo:
     """Actions and meta data for a photo"""
 
+    def __init__(self, camera_start_up_time):
+        # Time for camera to start and stabilize
+        self.camera_start_up_time = camera_start_up_time
+
     def take_and_save_photo(self, file_path_name):
         # Take a photo and save it in the given file path name
         # file_path_name includes a relative or absolute path to the file
 
         with picamera.PiCamera() as camera:
-            # Let camera start up and stabilize
-            # A quick internet suggests at least 1 sec, so 2 is safe
-            CAMERA_START_UP_TIME = 2
 
-            # 1920x108o is HD video at about 1.2MB per jpg file
+            # 1920x108o is HD video at about 1MB - 2MB per jpg file
             HORIZONTAL_RESOLUTION = 1920
             VERTICAL_RESOLUTION = 1080
             camera.resolution = (HORIZONTAL_RESOLUTION, VERTICAL_RESOLUTION)
             # TODO Do we want to add anything to exif data?
 
-            time.sleep(CAMERA_START_UP_TIME)
+            time.sleep(self.camera_start_up_time)
             camera.capture(file_path_name)
 
         return
 
 def take_photo():
-    logging.basicConfig(format='%(asctime)s %(levelname)s: %(message)s',
+    # PROJECT_DIR = "/synology211j/Share/raspberry-pi/timelapse/"
+    PROJECT_DIR = "/media/usb1/projects/timelapse"
+    # PROJECT_DIR = "/home/pi/projects/timelapse/photos"
+    # PROJECT_DIR = '/bogus'
+
+    LOG_FILE = os.path.join(PROJECT_DIR, 'take_photo.log')
+
+    # A quick internet search suggests at least 1 sec for pi camera start up,
+    # so 2 sec is safe
+    CAMERA_START_UP_TIME = 2
+
+    logging.basicConfig(filename=LOG_FILE,
+        format='%(asctime)s %(levelname)s: %(message)s',
         level=logging.INFO)
-    # ROOT_DIR = "/synology211j/Share/raspberry-pi/timelapse/"
-    ROOT_DIR = "/media/usb1/projects/timelapse"
-    # ROOT_DIR = "/home/pi/projects/timelapse/photos"
-    # ROOT_DIR = '/bogus'
     logging.debug('Starting take_photo')
     try:
         logging.debug('Creating FileManager')
-        file_mgr = FileManager(ROOT_DIR)
+        file_mgr = FileManager(PROJECT_DIR)
         logging.debug('Getting file path')
         file_name_path = file_mgr.get_file_path()
         logging.debug('Photo file path name: %s', file_name_path)
@@ -128,13 +138,14 @@ def take_photo():
         logging.error('Failed to create: %s', os.path.dirname(file_name_path))
         return
 
-    photo = Photo()
+    logging.info('Taking photo with file path: %s', file_name_path)
+    photo = Photo(CAMERA_START_UP_TIME)
     photo.take_and_save_photo(file_name_path)
-    # NEXT Add message logging
+    # WIP  Add message logging
     # NEXT Add tests for logging and top level take_photo
-    # NEXT Add check as to whether or not to take a photo - provide a way
-    #      to turn off/on capture without editing cron tab.  Log a message
-    #      if disabled
+    # NEXT Is a try/except needed for take_and_save_photo?
+    # NEXT Add check as to whether or not to take a photo - don't take photos
+    #      when it's dark.  Log a message either way.
     # LATER Add a separate monitoring routine to send email if photos
     #       aren't being added to the NFS share (maye run on a different
     #       computer in case the Pi dies?

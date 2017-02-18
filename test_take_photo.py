@@ -43,6 +43,8 @@ class TestFileManager(unittest.TestCase):
         root_dir = os.path.join("test")
         test_dirs = []
 
+        # TODO: Test fails if root_dir was not deleted from a previous failing
+        #       test run.  I thought I fixed that, but I missed something.
         try:
             # Pick some specific values to verify the right directories get created
             year, month, day = '2001', '09', '11'
@@ -145,11 +147,18 @@ class TestPhoto(unittest.TestCase):
         test_file = "test.jpg"
         test_file_path = os.path.join(test_dir, test_file)
 
+        # NEXT: With the try finally, if something fails in the try, the
+        #       messages are hidden - you get an error message from the
+        #       finally block.  Need a way to show the failure messages
+        #       and guarantee clean up.  Maybe an after hook to remove
+        #       the test directory?
         try:
             self.assertFalse(os.path.isfile(test_file_path),
                 "Verify test file does not exist before taking photo")
 
-            p = take_photo.Photo()
+            # TODO: Add some tests to validate the range of start up times?
+            CAMERA_START_UP_TIME = 1
+            p = take_photo.Photo(CAMERA_START_UP_TIME)
             p.take_and_save_photo(test_file_path)
             self.assertTrue(os.path.isfile(test_file_path),
                 "Verify test file exists after taking photo")
@@ -173,7 +182,16 @@ class TestPhoto(unittest.TestCase):
                 "Verify test directory does not exist after clean-up")
         return
 
+class TestTakePhoto(unittest.TestCase):
+    # NEXT: This runs the take_photo function.  Need to create a set of tests
+    # Might need to add some parameters to make the functions more testable.
+    # Example: Running this logs to a default logfile - want to log to a
+    # test log file to test the logging functions.
+    def test_take_photo(self):
+        take_photo.take_photo()
+
 suite = unittest.TestLoader().loadTestsFromTestCase(TestFileManager)
 suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestPhoto))
+# suite.addTests(unittest.TestLoader().loadTestsFromTestCase(TestTakePhoto))
 unittest.TextTestRunner(verbosity=2).run(suite)
 

@@ -2,7 +2,7 @@
 
 import os
 import unittest
-from CameraSettings import CameraSettings
+from timelapse.CameraSettings import CameraSettings
 
 class TestCameraSettings(unittest.TestCase):
     def test_default_camera_settings(self):

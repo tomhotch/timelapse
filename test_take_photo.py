@@ -156,9 +156,13 @@ class TestPhoto(unittest.TestCase):
             self.assertFalse(os.path.isfile(test_file_path),
                 "Verify test file does not exist before taking photo")
 
-            # TODO: Add some tests to validate the range of start up times?
-            CAMERA_START_UP_TIME = 1
-            p = take_photo.Photo(CAMERA_START_UP_TIME)
+            # TODO: Add some tests to validate the range of start up times
+            #       Should be in a unit test for CameraSettings?
+            camera_settings = take_photo.CameraSettings()
+
+            # Reduce the start up time for the test to run fast
+            camera_settings.camera_start_up_time = 0.5
+            p = take_photo.Photo(camera_settings)
             p.take_and_save_photo(test_file_path)
             self.assertTrue(os.path.isfile(test_file_path),
                 "Verify test file exists after taking photo")

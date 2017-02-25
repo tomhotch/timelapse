@@ -22,12 +22,21 @@
 # Options:
 # Currently none - could add resolution, burst, naming, root directory, etc.
 
+# TODO: Refactor per
+# http://www.oreilly.com/programming/free/files/real-world-maintainable-software.pdf
+#
+# TODO: Error handling and logging
+#
+# TODO: Don't take phots at night
+
 import os
 import time
 import datetime
 import logging
 
 import picamera
+
+from CameraSettings import CameraSettings
 
 class FileManager:
     """Create directories and file names for storing photos"""
@@ -82,13 +91,11 @@ class FileManager:
         return os.path.join(self.root_dir, year_str, month_str, day_str,
             self.file_name)
 
-
 class Photo:
     """Actions and meta data for a photo"""
 
-    def __init__(self, camera_start_up_time):
-        # Time for camera to start and stabilize
-        self.camera_start_up_time = camera_start_up_time
+    def __init__(self, camera_settings):
+        self.camera_settings = camera_settings
 
     def take_and_save_photo(self, file_path_name):
         # Take a photo and save it in the given file path name
@@ -96,13 +103,13 @@ class Photo:
 
         with picamera.PiCamera() as camera:
 
-            # 1920x108o is HD video at about 1MB - 2MB per jpg file
-            HORIZONTAL_RESOLUTION = 1920
-            VERTICAL_RESOLUTION = 1080
-            camera.resolution = (HORIZONTAL_RESOLUTION, VERTICAL_RESOLUTION)
+            camera.resolution = (self.camera_settings.horizontal_resolution,
+                    self.camera_settings.vertical_resolution)
+
+            camera.rotation = self.camera_settings.rotation
             # TODO Do we want to add anything to exif data?
 
-            time.sleep(self.camera_start_up_time)
+            time.sleep(self.camera_settings.camera_start_up_time)
             camera.capture(file_path_name)
 
         return
@@ -114,10 +121,6 @@ def take_photo():
     # PROJECT_DIR = '/bogus'
 
     LOG_FILE = os.path.join(PROJECT_DIR, 'take_photo.log')
-
-    # A quick internet search suggests at least 1 sec for pi camera start up,
-    # so 2 sec is safe
-    CAMERA_START_UP_TIME = 2
 
     logging.basicConfig(filename=LOG_FILE,
         format='%(asctime)s %(levelname)s: %(message)s',
@@ -139,7 +142,12 @@ def take_photo():
         return
 
     logging.info('Taking photo with file path: %s', file_name_path)
-    photo = Photo(CAMERA_START_UP_TIME)
+
+    camera_settings = CameraSettings();
+    # Camera is mounted upside down in the weatherproof housing
+    # Need to rotate 180 degrees so photo is right side up
+    camera_settings.rotation = 180
+    photo = Photo(camera_settings)
     photo.take_and_save_photo(file_name_path)
     # WIP  Add message logging
     # NEXT Add tests for logging and top level take_photo

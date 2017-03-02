@@ -1,25 +1,18 @@
 import time
 import picamera
 
-class Photo:
-    """Actions and meta data for a photo"""
+def take_and_save_photo(camera_settings, file_path_name):
+    # Take a photo and save it in the given file path name
+    # file_path_name includes a relative or absolute path to the file
 
-    def __init__(self, camera_settings):
-        self.camera_settings = camera_settings
+    with picamera.PiCamera() as camera:
+        camera.resolution = (camera_settings.horizontal_resolution,
+                             camera_settings.vertical_resolution)
+        camera.rotation = camera_settings.rotation
 
-    def take_and_save_photo(self, file_path_name):
-        # Take a photo and save it in the given file path name
-        # file_path_name includes a relative or absolute path to the file
+        # TODO Do we want to add anything to exif data?
 
-        with picamera.PiCamera() as camera:
+        time.sleep(camera_settings.camera_start_up_time)
+        camera.capture(file_path_name)
 
-            camera.resolution = (self.camera_settings.horizontal_resolution,
-                    self.camera_settings.vertical_resolution)
-
-            camera.rotation = self.camera_settings.rotation
-            # TODO Do we want to add anything to exif data?
-
-            time.sleep(self.camera_settings.camera_start_up_time)
-            camera.capture(file_path_name)
-
-        return
+    return

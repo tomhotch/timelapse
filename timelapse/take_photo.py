@@ -33,7 +33,7 @@ import os
 import logging
 
 from FileManager import FileManager
-from Photo import Photo
+import Photo
 from CameraSettings import CameraSettings
 
 def take_photo():
@@ -69,8 +69,8 @@ def take_photo():
     # Camera is mounted upside down in the weatherproof housing
     # Need to rotate 180 degrees so photo is right side up
     camera_settings.rotation = 180
-    photo = Photo(camera_settings)
-    photo.take_and_save_photo(file_name_path)
+
+    Photo.take_and_save_photo(camera_settings, file_name_path)
     # WIP  Add message logging
     # NEXT Add tests for logging and top level take_photo
     # NEXT Is a try/except needed for take_and_save_photo?

@@ -3,7 +3,7 @@
 import os
 
 import unittest
-from timelapse.CameraSettings import CameraSettings
+from timelapse.settings import CameraSettings
 import timelapse.Photo
 
 class TestPhoto(unittest.TestCase):

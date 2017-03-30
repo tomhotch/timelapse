@@ -34,23 +34,19 @@ import logging
 
 from FileManager import FileManager
 import Photo
-from CameraSettings import CameraSettings
+from settings import CameraSettings
+from settings import FileSettings
 
 def take_photo():
-    # PROJECT_DIR = "/synology211j/Share/raspberry-pi/timelapse/"
-    PROJECT_DIR = "/media/usb1/projects/timelapse"
-    # PROJECT_DIR = "/home/pi/projects/timelapse/photos"
-    # PROJECT_DIR = '/bogus'
+    file_settings = FileSettings()
 
-    LOG_FILE = os.path.join(PROJECT_DIR, 'take_photo.log')
-
-    logging.basicConfig(filename=LOG_FILE,
+    logging.basicConfig(filename=file_settings.log_file(),
         format='%(asctime)s %(levelname)s: %(message)s',
         level=logging.INFO)
     logging.debug('Starting take_photo')
     try:
         logging.debug('Creating FileManager')
-        file_mgr = FileManager(PROJECT_DIR)
+        file_mgr = FileManager(file_settings.project_dir)
         logging.debug('Getting file path')
         file_name_path = file_mgr.get_file_path()
         logging.debug('Photo file path name: %s', file_name_path)
@@ -65,7 +61,7 @@ def take_photo():
 
     logging.info('Taking photo with file path: %s', file_name_path)
 
-    camera_settings = CameraSettings();
+    camera_settings = CameraSettings()
     # Camera is mounted upside down in the weatherproof housing
     # Need to rotate 180 degrees so photo is right side up
     camera_settings.rotation = 180

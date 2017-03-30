@@ -4,7 +4,7 @@ import os
 
 import unittest
 import timelapse.take_photo
-from timelapse.CameraSettings import CameraSettings
+from timelapse.settings import CameraSettings
 
 class TestTakePhoto(unittest.TestCase):
     # NEXT: This runs the take_photo function.

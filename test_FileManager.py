@@ -7,7 +7,8 @@ from timelapse.FileManager import FileManager
 class TestFileManager(unittest.TestCase):
     def test_default_root_dir(self):
         f = FileManager()
-        self.assertEqual(f.root_dir, ".", \
+        self.assertEqual(
+            f.root_dir, ".",
             "FileManager default root_dir is current directory")
 
     def test_set_root_dir(self):
@@ -23,17 +24,23 @@ class TestFileManager(unittest.TestCase):
         # Checks that the year is between 2016 and 2099.  2099 is somewhat
         # arbitrary - the test will work for many years ... probably more
         # than is necessary.
-        self.assertIn(year, range(2016, 2100),
+        self.assertIn(
+            year, range(2016, 2100),
             "FileManger get_datetime returns a valid year")
-        self.assertIn(month, range(1, 13),
+        self.assertIn(
+            month, range(1, 13),
             "FileManger get_datetime returns a valid month")
-        self.assertIn(day, range(1, 32),
+        self.assertIn(
+            day, range(1, 32),
             "FileManger get_datetime returns a valid day")
-        self.assertIn(hour, range(1, 25),
+        self.assertIn(
+            hour, range(1, 25),
             "FileManger get_datetime returns a valid hour")
-        self.assertIn(minute, range(0, 60),
+        self.assertIn(
+            minute, range(0, 60),
             "FileManger get_datetime returns a valid minute")
-        self.assertIn(second, range(0, 60),
+        self.assertIn(
+            second, range(0, 60),
             "FileManger get_datetime returns a valid second")
 
     def test_create_direcotry(self):
@@ -51,12 +58,14 @@ class TestFileManager(unittest.TestCase):
             expected_dir = os.path.join(root_dir, year, month, day)
             test_dirs.append(expected_dir)
 
-            self.assertFalse(os.path.isdir(root_dir),
+            self.assertFalse(
+                os.path.isdir(root_dir),
                 "Verify year directory does not exist before creating it")
 
             f = FileManager(root_dir)
             f._create_directories(root_dir, year, month, day)
-            self.assertTrue(os.path.isdir(expected_dir),
+            self.assertTrue(
+                os.path.isdir(expected_dir),
                 "Verify directories created successfully")
 
             # Make sure the top level directory created has owner, group,
@@ -69,22 +78,26 @@ class TestFileManager(unittest.TestCase):
             # Raspberry Pi
 
             mode = os.stat(year_dir).st_mode & 0777
-            self.assertEqual(mode, 0777,
+            self.assertEqual(
+                mode, 0777,
                 "Verity year directory is user, group, world read/write/execute")
 
             f._create_directories(root_dir, year, month, day)
-            self.assertTrue(os.path.isdir(expected_dir),
+            self.assertTrue(
+                os.path.isdir(expected_dir),
                 "Verify create_directories works if the directory already exists")
 
             # Try making just a day directory (year and month exist)
             day = '12'
             expected_dir = os.path.join(root_dir, year, month, day)
             test_dirs.append(expected_dir)
-            self.assertFalse(os.path.isdir(expected_dir),
+            self.assertFalse(
+                os.path.isdir(expected_dir),
                 "Verify day directory does not exist before creating it")
 
             f._create_directories(root_dir, year, month, day)
-            self.assertTrue(os.path.isdir(expected_dir),
+            self.assertTrue(
+                os.path.isdir(expected_dir),
                 "Verify a new day directory was created successfully")
 
 
@@ -92,10 +105,12 @@ class TestFileManager(unittest.TestCase):
             # Clean up - remove directories created just for this test
             for dir in test_dirs:
                 os.removedirs(dir)
-                self.assertFalse(os.path.isdir(dir),
+                self.assertFalse(
+                    os.path.isdir(dir),
                     "Verify test directory does not exist after clean up")
 
-            self.assertFalse(os.path.isdir(root_dir),
+            self.assertFalse(
+                os.path.isdir(root_dir),
                 "Verify root test directory does not exist after clean up")
 
     def test_get_file_path(self):
@@ -109,17 +124,18 @@ class TestFileManager(unittest.TestCase):
             # TODO: The regex path check is unix specific.  Is there
             # a way to have a regexp check for os path separator?
             path, basename = os.path.split(file_path)
-            self.assertRegexpMatches(path, "\d\d\d\d/\d\d/\d\d",
-                "Verify path format is yyyy/mm/dd")
+            self.assertRegexpMatches(
+                path, "\d\d\d\d/\d\d/\d\d", "Verify path format is yyyy/mm/dd")
 
-            self.assertRegexpMatches(basename,
-                "\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d.jpg",
+            self.assertRegexpMatches(
+                basename, "\d\d\d\d-\d\d-\d\d_\d\d-\d\d-\d\d.jpg",
                 "Verify file name format is year-month-day_hour-minute-second.jpg")
 
         finally:
             # Clean up - remove directories created just for this test
             os.removedirs(os.path.dirname(file_path))
-            self.assertFalse(os.path.isdir(root_dir),
+            self.assertFalse(
+                os.path.isdir(root_dir),
                 "Verify test directory does not exist after clean up")
 
         # Error Cases

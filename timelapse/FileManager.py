@@ -48,8 +48,9 @@ class FileManager:
 
         self._create_directories(self.root_dir, year_str, month_str, day_str)
 
-        self.file_name = year_str + "-" + month_str + "-" + day_str + "_" \
-            + "{:02d}-{:02d}-{:02d}.jpg".format(hour, minute, second)
+        self.file_name = (
+            year_str + "-" + month_str + "-" + day_str + "_"
+            + "{:02d}-{:02d}-{:02d}.jpg".format(hour, minute, second))
         
         return os.path.join(self.root_dir, year_str, month_str, day_str,
             self.file_name)

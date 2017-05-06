@@ -22,6 +22,7 @@
 # Options:
 # Currently none - could add resolution, burst, naming, root directory, etc.
 
+# TODO: Make unit test use a mock PiCamera
 # TODO: Refactor per
 # http://www.oreilly.com/programming/free/files/real-world-maintainable-software.pdf
 #
@@ -40,7 +41,8 @@ from settings import FileSettings
 def take_photo():
     file_settings = FileSettings()
 
-    logging.basicConfig(filename=file_settings.log_file(),
+    logging.basicConfig(
+        filename=file_settings.log_file(),
         format='%(asctime)s %(levelname)s: %(message)s',
         level=logging.INFO)
     logging.debug('Starting take_photo')
@@ -52,8 +54,8 @@ def take_photo():
         logging.debug('Photo file path name: %s', file_name_path)
     except:
         # Got an error trying to create the directory.
-        # NEXT file_name_path isn't set on an exception.  What exception message
-        #      is raised?  Print that?  Yes, need to debug the error.
+        # NEXT file_name_path isn't set on an exception.  What exception
+        #      message is raised?  Print that?  Yes, need to debug the error.
         # NEXT Create a unit (or behavioral test) to check this logic - does
         #      it need to be put into a separate module?
         logging.error('Failed to create: %s', os.path.dirname(file_name_path))

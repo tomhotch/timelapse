@@ -13,7 +13,8 @@ class TestPhoto(unittest.TestCase):
         test_file = "test.jpg"
         test_file_path = os.path.join(test_dir, test_file)
 
-        self.assertFalse(os.path.isfile(test_file_path),
+        self.assertFalse(
+            os.path.isfile(test_file_path),
             "Verify test file does not exist before taking photo")
 
         # TODO: Add some tests to validate the range of start up times
@@ -23,7 +24,8 @@ class TestPhoto(unittest.TestCase):
         # Reduce the start up time for the test to run fast
         camera_settings.camera_start_up_time = 0.5
         timelapse.Photo.take_and_save_photo(camera_settings, test_file_path)
-        self.assertTrue(os.path.isfile(test_file_path),
+        self.assertTrue(
+            os.path.isfile(test_file_path),
             "Verify test file exists after taking photo")
 
         # Expected size of .jpg with 1920 x 1080 resolution
@@ -41,7 +43,8 @@ class TestPhoto(unittest.TestCase):
         os.remove(test_file_path)
         os.removedirs(test_dir)
 
-        self.assertFalse(os.path.isfile(test_dir),
+        self.assertFalse(
+            os.path.isfile(test_dir),
             "Verify test directory does not exist after clean-up")
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestPhoto)

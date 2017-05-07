@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import os
-
 import unittest
-import timelapse.take_photo
-from timelapse.settings import CameraSettings
+import context
+
+import take_photo
 
 class TestTakePhoto(unittest.TestCase):
     # NEXT: This runs the take_photo function.
@@ -15,7 +15,7 @@ class TestTakePhoto(unittest.TestCase):
     # Example: Running this logs to a default logfile - want to log to a
     # test log file to test the logging functions.
     def test_take_photo(self):
-        timelapse.take_photo.take_photo()
+        take_photo.take_photo()
 
 suite = unittest.TestLoader().loadTestsFromTestCase(TestTakePhoto)
 unittest.TextTestRunner(verbosity=2).run(suite)

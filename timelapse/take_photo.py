@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # Purpose: Take a photo for creating a time lapse video
 # - Save in a date based directory structure - one directory per day
@@ -34,9 +34,10 @@ import os
 import logging
 
 from FileManager import FileManager
-import Photo
+from Photo import take_and_save_photo
 from settings import CameraSettings
 from settings import FileSettings
+
 
 def take_photo():
     file_settings = FileSettings()
@@ -68,7 +69,7 @@ def take_photo():
     # Need to rotate 180 degrees so photo is right side up
     camera_settings.rotation = 180
 
-    Photo.take_and_save_photo(camera_settings, file_name_path)
+    take_and_save_photo(camera_settings, file_name_path)
     # WIP  Add message logging
     # NEXT Add tests for logging and top level take_photo
     # NEXT Is a try/except needed for take_and_save_photo?

@@ -1,13 +1,14 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import os
 import unittest
-from timelapse.settings import CameraSettings
-from timelapse.settings import FileSettings
+import context
+
+import settings
 
 class TestCameraSettings(unittest.TestCase):
     def test_default_camera_settings(self):
-        cs = CameraSettings()
+        cs = settings.CameraSettings()
         self.assertEqual(
             cs.horizontal_resolution, 1920,
             "Default horizontal resolution should be 1920")
@@ -20,14 +21,14 @@ class TestCameraSettings(unittest.TestCase):
         self.assertEqual(cs.rotation, 0, "Default rotation should be zero")
 
     def test_modify_camera_settings(self):
-        cs = CameraSettings()
+        cs = settings.CameraSettings()
         self.assertEqual(cs.rotation, 0, "Default rotation should be zero")
         cs.rotation=180
         self.assertEqual(cs.rotation, 180, "Can change rotation")
 
 class TestFileSettings(unittest.TestCase):
     def test_default_file_setting(self):
-        fs = FileSettings()
+        fs = settings.FileSettings()
         self.assertEqual(
             fs.project_dir, "/media/usb1/projects/timelapse",
             "Default project dir is correct")
@@ -39,7 +40,7 @@ class TestFileSettings(unittest.TestCase):
             "Default log file name with path is correct")
 
     def test_modify_file_settings(self):
-        fs = FileSettings()
+        fs = settings.FileSettings()
         self.assertEqual(
             fs.project_dir, "/media/usb1/projects/timelapse",
             "Default project dir is correct")

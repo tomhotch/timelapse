@@ -1,8 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import os
 import unittest
-from timelapse.FileManager import FileManager
+import context
+
+from FileManager import FileManager
 
 class TestFileManager(unittest.TestCase):
     def test_default_root_dir(self):
@@ -77,9 +79,9 @@ class TestFileManager(unittest.TestCase):
             # Assume Linux since the script is designed to run on
             # Raspberry Pi
 
-            mode = os.stat(year_dir).st_mode & 0777
+            mode = os.stat(year_dir).st_mode & 0o777
             self.assertEqual(
-                mode, 0777,
+                mode, 0o777,
                 "Verity year directory is user, group, world read/write/execute")
 
             f._create_directories(root_dir, year, month, day)
@@ -141,7 +143,7 @@ class TestFileManager(unittest.TestCase):
         # Error Cases
         # Create a directory that can't be written to
         unwritable_dir = "unwritable"
-        TEST_UMASK = 0222
+        TEST_UMASK = 0o222
         orig_umask = os.umask(TEST_UMASK)
         os.makedirs(unwritable_dir)
 

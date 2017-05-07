@@ -1,10 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import os
-
 import unittest
-from timelapse.settings import CameraSettings
-import timelapse.Photo
+import context
+
+from settings import CameraSettings
+import Photo
 
 class TestPhoto(unittest.TestCase):
     def test_take_and_save_photo(self):
@@ -23,7 +24,7 @@ class TestPhoto(unittest.TestCase):
 
         # Reduce the start up time for the test to run fast
         camera_settings.camera_start_up_time = 0.5
-        timelapse.Photo.take_and_save_photo(camera_settings, test_file_path)
+        Photo.take_and_save_photo(camera_settings, test_file_path)
         self.assertTrue(
             os.path.isfile(test_file_path),
             "Verify test file exists after taking photo")
